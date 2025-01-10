@@ -4,6 +4,27 @@ import { ExtractedFile } from "../types";
 import fs from "fs/promises";
 import path from "path";
 
+
+// Helper function to check if a file might be binary
+function isBinaryBuffer(buffer: Buffer): boolean {
+  // Check for null bytes and control characters
+  const controlChars = buffer.slice(0, Math.min(buffer.length, 24));
+  return controlChars.some(
+    (byte) =>
+      byte === 0 || (byte < 32 && byte !== 9 && byte !== 10 && byte !== 13)
+  );
+}
+
+// Helper function to check content safety
+function isContentSafe(content: string): boolean {
+  const unsafePatterns = [
+    "<|endoftext|>",
+    "\x00",
+    "\ufffd", 
+  ];
+  return !unsafePatterns.some((pattern) => content.includes(pattern));
+}
+
 export async function getFilteredFiles(
   workingDir: string,
   ignorePatterns: string[],
@@ -36,16 +57,40 @@ export async function processFiles(
 ): Promise<ExtractedFile[]> {
   const processed = await Promise.all(
     files.map(async (file) => {
-      const stats = await fs.stat(file);
-      if (stats.size > maxFileSize) {
+      try {
+        const stats = await fs.stat(file);
+
+        // Size check
+        if (stats.size > maxFileSize) {
+          console.debug(`Skipping ${file} (exceeds size limit)`);
+          return null;
+        }
+
+        // Read file as buffer first
+        const buffer = await fs.readFile(file);
+
+        // Binary check
+        if (isBinaryBuffer(buffer)) {
+          console.debug(`Skipping ${file} (appears to be binary)`);
+          return null;
+        }
+
+        // Convert to string and check content safety
+        const content = buffer.toString("utf-8");
+        if (!isContentSafe(content)) {
+          console.debug(`Skipping ${file} (contains unsafe content)`);
+          return null;
+        }
+
+        return {
+          path: path.relative(workingDir, file),
+          content,
+          size: stats.size,
+        };
+      } catch (error) {
+        console.error(`Error processing ${file}:`, error);
         return null;
       }
-      const content = await fs.readFile(file, "utf-8");
-      return {
-        path: path.relative(workingDir, file),
-        content,
-        size: stats.size,
-      };
     })
   );
 

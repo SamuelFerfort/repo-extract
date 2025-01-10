@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import { Command } from "commander";
+import { Command, Option } from "commander";
 import { extract } from "./index";
-
+import { CliOptions } from "./types";
 const program = new Command();
 
 program
-  .name("repo-to-text")
+  .name("repo-extract")
   .description(
     "CLI tool to analyze and create text dumps of codebases for LLMs"
   )
@@ -20,24 +20,47 @@ program
   )
   .option("-e, --exclude <patterns...>", "Patterns to exclude")
   .option("-i, --include <patterns...>", "Patterns to include")
-  .action(async (source: string, options) => {
+  .option(
+    "--include-docs",
+    "Include documentation files (README, markdown, etc)"
+  )
+  .addOption(
+    new Option("-f, --format <format>", "Output format")
+      .choices(["text", "json", "markdown"])
+      .default("text")
+  )
+  .action(async (source: string, options: CliOptions) => {
     try {
+      // Set default output filename based on format
+      const defaultOutput = options.format === 'json' ? 'output.json' 
+        : options.format === 'markdown' ? 'output.md'
+        : 'output.txt';
+
+      let excludePatterns = options.exclude || [];
+      if (!options.includeDocs) {
+        excludePatterns = [
+          ...excludePatterns,
+          "**/*.md",
+          "**/*.mdx",
+          "**/LICENSE*",
+          "**/CHANGELOG*",
+        ];
+      }
+
       const { summary, tree, content } = await extract({
         source,
         maxFileSize: parseInt(options.maxSize),
         includePatterns: options.include,
-        excludePatterns: options.exclude,
-        output: options.output,
+        excludePatterns,
+        output: options.output || defaultOutput,
+        format: options.format,
       });
 
       console.log("\nSummary:");
       console.log(summary);
-
-      if (options.output) {
-        console.log(
-          `\nAnalysis complete! Output written to: ${options.output}`
-        );
-      }
+      console.log(
+        `\nAnalysis complete! Output written to: ${options.output || defaultOutput}`
+      );
     } catch (error) {
       console.error(
         "Error:",

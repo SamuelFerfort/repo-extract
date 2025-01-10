@@ -10,7 +10,7 @@ export const DEFAULT_IGNORE_PATTERNS = [
   "**/*.pyo",
   "**/*.pyd",
   "**/__pycache__",
-  "**/node_modules",
+  '**/node_modules/**',
   "**/bower_components",
   "**/dist",
   "**/build",
@@ -101,25 +101,4 @@ export const DEFAULT_IGNORE_PATTERNS = [
   "**/.settings",
   "**/.classpath",
 
-  // Documentation (might want to selectively include some of these)
-  "**/docs/**",
-  "**/doc/**",
-  "**/documentation/**",
-  "**/*.md",
-  "**/*.mdx",
-  "**/LICENSE*",
-  "**/CHANGELOG*",
-  "**/CONTRIBUTING*",
-
-  // Test files and fixtures (optional, depending on use case)
-  "**/test/**",
-  "**/tests/**",
-  "**/__tests__/**",
-  "**/*.test.*",
-  "**/*.spec.*",
-  "**/fixtures/**",
-  "**/cypress/**",
-  "**/jest/**",
-  "**/vitest/**",
-  "**/coverage/**",
 ];

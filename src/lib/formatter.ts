@@ -32,8 +32,76 @@ export function generateTree(baseDir: string, files: string[]): string {
   return tree.join("\n");
 }
 
-export function formatContent(files: ExtractedFile[]): string {
+export function formatPlainText(files: ExtractedFile[]): string {
   return files
     .map((file) => `File: ${file.path}\n${"=".repeat(48)}\n${file.content}\n`)
     .join("\n");
+}
+
+export function formatMarkdown(files: ExtractedFile[], tree: string): string {
+  const sections = [
+    "# Repository Analysis\n",
+    "## Directory Structure\n",
+    "```",
+    tree,
+    "```\n",
+    "## Files\n",
+  ];
+
+  files.forEach((file) => {
+    sections.push(
+      `### ${file.path}\n`,
+      "```" + (getFileExtension(file.path) || ""),
+      file.content,
+      "```\n"
+    );
+  });
+
+  return sections.join("\n");
+}
+
+export function formatJson(
+  files: ExtractedFile[],
+  tree: string,
+  stats: Record<string, any>
+): string {
+  const output = {
+    stats,
+    directoryStructure: tree.split("\n"),
+    files: files.map((file) => ({
+      path: file.path,
+      size: file.size,
+      content: file.content,
+    })),
+  };
+
+  return JSON.stringify(output, null, 2);
+}
+
+function getFileExtension(filePath: string): string {
+  const ext = path.extname(filePath).toLowerCase();
+  // Maps common extensions to their language names
+  const languageMap: Record<string, string> = {
+    ".js": "javascript",
+    ".ts": "typescript",
+    ".py": "python",
+    ".rb": "ruby",
+    ".java": "java",
+    ".cpp": "cpp",
+    ".cs": "csharp",
+    ".go": "go",
+    ".rs": "rust",
+    ".php": "php",
+    ".html": "html",
+    ".css": "css",
+    ".sql": "sql",
+    ".sh": "bash",
+    ".yaml": "yaml",
+    ".yml": "yaml",
+    ".json": "json",
+    ".md": "markdown",
+    ".xml": "xml",
+  };
+
+  return languageMap[ext] || "";
 }
