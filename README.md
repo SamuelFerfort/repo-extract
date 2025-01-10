@@ -35,18 +35,12 @@ const {summary, tree, content, stats, tokens} = await extract({
   maxFileSize: 10485760                      // Optional: max file size in bytes (default: 10MB)
 });
 
-
-
 // Returns:
 // - summary: Overview of processed files, sizes and tokens
 // - tree: Repository file structure visualization
 // - content: Extracted contents in specified format 
 // - stats: Detailed analysis statistics
 // - tokens: Estimates tokens
-
-
-
-
 ```
 
 ## Options
@@ -70,10 +64,10 @@ repo-extract https://github.com/user/repo
 # Extract current directory as JSON
 repo-extract . -f json
 
-# Example: Extract repository content, include only source code, exclude tests, and output as JSON
+# Extract repository content, include only source code, exclude tests, and output as JSON
 repo-extract . -i "src/**/*.ts" -e "**/*.test.ts" -f json
 
-# Example: Extract content from a GitHub repo and output as Markdown, excluding documentation files
+# Extract content from a GitHub repo and output as Markdown, excluding documentation files
 repo-extract https://github.com/user/repo -f markdown --exclude-docs
 
 
@@ -101,4 +95,4 @@ const result = await extract({
 
 ## License
 
-MIT
+This project is licensed under the [MIT License](LICENSE).
