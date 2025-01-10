@@ -47,7 +47,7 @@ program
         ];
       }
 
-      const { summary, tree, content } = await extract({
+      const { summary} = await extract({
         source,
         maxFileSize: parseInt(options.maxSize),
         includePatterns: options.include,

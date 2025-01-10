@@ -4,7 +4,7 @@ export interface RepoExtractOptions {
   includePatterns?: string[];
   excludePatterns?: string[];
   output?: string | boolean;
-  format?: 'text' | 'json' | 'markdown';
+  format?: "text" | "json" | "markdown";
 }
 
 export interface RepoExtractResult {
@@ -18,6 +18,7 @@ export interface RepoExtractResult {
     totalSize: number;
     totalTokens: number;
   };
+  tokens: number;
 }
 export interface ExtractedFile {
   path: string;

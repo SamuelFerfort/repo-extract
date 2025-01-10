@@ -26,20 +26,26 @@ repo-extract https://github.com/user/repo
 ```typescript
 import { extract } from 'repo-extract';
 
-const {summary, tree, content, stats } = await extract({
+const {summary, tree, content, stats, tokens} = await extract({
   source: 'https://github.com/user/repo',    // Repository URL or local path
   output: 'output.txt',                      // Optional: output file path
-  format: 'text',                            // Optional: 'text' | 'json' | 'markdown'
+  format: 'text',                            // Optional: 'text' | 'json' | 'markdown' (default text)
   includePatterns: ['src/**/*.ts'],          // Optional: files to include
   excludePatterns: ['**/*.test.ts'],         // Optional: files to exclude
   maxFileSize: 10485760                      // Optional: max file size in bytes (default: 10MB)
 });
 
+
+
 // Returns:
 // - summary: Overview of processed files, sizes and tokens
 // - tree: Repository file structure visualization
-// - content: Extracted contents in specified format
+// - content: Extracted contents in specified format 
 // - stats: Detailed analysis statistics
+// - tokens: Estimates tokens
+
+
+
 
 ```
 
@@ -61,14 +67,16 @@ const {summary, tree, content, stats } = await extract({
 # Extract GitHub repo
 repo-extract https://github.com/user/repo
 
-# Extract as JSON
+# Extract current directory as JSON
 repo-extract . -f json
 
-# Include only TypeScript files
-repo-extract . -i "src/**/*.ts"
+# Example: Extract repository content, include only source code, exclude tests, and output as JSON
+repo-extract . -i "src/**/*.ts" -e "**/*.test.ts" -f json
 
-# Exclude test files
-repo-extract . -e "**/*.test.ts" "**/*.spec.ts"
+# Example: Extract content from a GitHub repo and output as Markdown, excluding documentation files
+repo-extract https://github.com/user/repo -f markdown --exclude-docs
+
+
 ```
 
 ### Package

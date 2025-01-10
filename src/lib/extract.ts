@@ -16,7 +16,6 @@ import fs from "fs/promises";
 export async function extract(
   options: RepoExtractOptions
 ): Promise<RepoExtractResult> {
-  console.log("Debug - options:", options);
   const {
     source,
     maxFileSize = 10 * 1024 * 1024, // 10MB default
@@ -59,9 +58,6 @@ export async function extract(
 
   // Generate outputs
   const tree = generateTree(workingDir, filteredFiles);
-  console.log("Debug - files found:", filteredFiles.length);
-  console.log("Debug - processed files:", processedFiles.length);
-  console.log("Debug - format:", format);
 
   let content: string;
   switch (format) {
@@ -74,7 +70,7 @@ export async function extract(
     default:
       content = formatPlainText(processedFiles);
   }
-
+ 
   const summary = [
     `Files found: ${stats.filesFound}`,
     `Files excluded by patterns: ${stats.filesExcluded}`,
@@ -93,5 +89,5 @@ export async function extract(
       : await fs.writeFile(outputPath, `${tree}\n\n${content}`);
   }
 
-  return { summary, tree, content, stats };
+  return { summary, tree, content, stats, tokens: stats.totalTokens};
 }
