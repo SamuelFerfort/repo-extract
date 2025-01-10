@@ -9,6 +9,6 @@ export async function cloneRepository(url: string): Promise<string> {
   
   const git = simpleGit();
   await git.clone(url, tmpDir, ['--depth', '1']);
-  
+   
   return tmpDir;
-}
+} 
