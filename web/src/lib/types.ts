@@ -15,6 +15,7 @@ export type ActionState = {
   feedback: UnifiedFeedback | null;
   error: string | null;
   rawRepoContent: string | null;
+  tree: string | null;
 };
 
 export type FeedbackError = {
@@ -33,7 +34,7 @@ export interface ScoreCardProps {
   title: string;
   score: number;
   summary: string;
-  risks: string[]; // Maps to criticalIssues, technicalDebt, errorProne, etc.
-  actions: string[]; // Maps to recommendations, bestPractices, quickWins, etc.
+  risks: string[]; 
+  actions: string[]; 
   children?: React.ReactNode;
 }

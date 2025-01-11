@@ -17,11 +17,11 @@ import { generateRepoFeedback } from "@/lib/actions";
 import ScoreCard from "@/components/common/score-card";
 import { LoadingSkeleton } from "@/components/common/loading-skeleton";
 
-
 const initialState: ActionState = {
   feedback: null,
   error: null,
   rawRepoContent: null,
+  tree: null,
 };
 
 export default function Home() {
