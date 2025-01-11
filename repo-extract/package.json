@@ -1,6 +1,6 @@
 {
     "name": "repo-extract",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "CLI tool to analyze and create text dumps of codebases for LLMs",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
