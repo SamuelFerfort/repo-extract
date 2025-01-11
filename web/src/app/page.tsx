@@ -1,101 +1,232 @@
-import Image from "next/image";
+"use client";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useActionState } from "react";
+import CopyIcon from "@/components/common/copy-button";
+import { ActionState } from "@/lib/types";
+import { generateRepoFeedback } from "@/lib/actions";
+import ScoreCard from "@/components/common/score-card";
+import { LoadingSkeleton } from "@/components/common/loading-skeleton";
+const initialState: ActionState = {
+  feedback: null,
+  error: null,
+  rawRepoContent: null,
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [state, formAction, isPending] = useActionState(
+    generateRepoFeedback,
+    initialState
+  );
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+  return (
+    <main className="min-h-screen p-8">
+      <div className="max-w-6xl mx-auto space-y-8">
+        <form action={formAction} className="flex gap-2">
+          <Input
+            type="url"
+            name="url"
+            className="flex-1"
+            placeholder="Enter repository URL"
+            required
+            disabled={isPending}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "Analyzing..." : "Analyze Repository"}
+          </Button>
+        </form>
+
+        {state.error && (
+          <Alert variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{state.error}</AlertDescription>
+          </Alert>
+        )}
+        {isPending && <LoadingSkeleton />}
+        {!isPending && state.feedback && (
+          <Tabs defaultValue="analysis" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="analysis">Analysis</TabsTrigger>
+              <TabsTrigger value="raw">Raw Content</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="analysis" className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <ScoreCard
+                  title="Security"
+                  score={state.feedback.security.score}
+                >
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Issues</h4>
+                      <ul className="space-y-2">
+                        {state.feedback.security.issues.map((issue, i) => (
+                          <li
+                            key={i}
+                            className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between"
+                          >
+                            <span>{issue}</span>
+                            <CopyIcon textToCopy={issue} />
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-2">Recommendations</h4>
+                      <ul className="space-y-2">
+                        {state.feedback.security.recommendations.map(
+                          (rec, i) => (
+                            <li
+                              key={i}
+                              className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between"
+                            >
+                              <span>{rec}</span>
+                              <CopyIcon textToCopy={rec} />
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                </ScoreCard>
+
+                <ScoreCard
+                  title="Code Quality"
+                  score={state.feedback.codeQuality.score}
+                >
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Strengths</h4>
+                      <ul className="space-y-2">
+                        {state.feedback.codeQuality.strengths.map(
+                          (strength, i) => (
+                            <li
+                              key={i}
+                              className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between"
+                            >
+                              <span>{strength}</span>
+                              <CopyIcon textToCopy={strength} />
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-2">Improvements</h4>
+                      <ul className="space-y-2">
+                        {state.feedback.codeQuality.improvements.map(
+                          (improvement, i) => (
+                            <li
+                              key={i}
+                              className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between"
+                            >
+                              <span>{improvement}</span>
+                              <CopyIcon textToCopy={improvement} />
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                </ScoreCard>
+
+                <ScoreCard
+                  title="Architecture"
+                  score={state.feedback.architecture.score}
+                >
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between">
+                      <span>{state.feedback.architecture.analysis}</span>
+                      <CopyIcon
+                        textToCopy={state.feedback.architecture.analysis}
+                      />
+                    </p>
+                    <div>
+                      <h4 className="font-medium mb-2">Suggestions</h4>
+                      <ul className="space-y-2">
+                        {state.feedback.architecture.suggestions.map(
+                          (suggestion, i) => (
+                            <li
+                              key={i}
+                              className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between"
+                            >
+                              <span>{suggestion}</span>
+                              <CopyIcon textToCopy={suggestion} />
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                </ScoreCard>
+
+                <ScoreCard
+                  title="Performance"
+                  score={state.feedback.performance.score}
+                >
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Findings</h4>
+                      <ul className="space-y-2">
+                        {state.feedback.performance.findings.map(
+                          (finding, i) => (
+                            <li
+                              key={i}
+                              className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between"
+                            >
+                              <span>{finding}</span>
+                              <CopyIcon textToCopy={finding} />
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-2">Optimizations</h4>
+                      <ul className="space-y-2">
+                        {state.feedback.performance.optimizations.map(
+                          (optimization, i) => (
+                            <li
+                              key={i}
+                              className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between"
+                            >
+                              <span>{optimization}</span>
+                              <CopyIcon textToCopy={optimization} />
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                </ScoreCard>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="raw">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Raw Repository Content</CardTitle>
+                  <CardDescription>
+                    Copy the raw content to use with your preferred LLM
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-end">
+                  <CopyIcon textToCopy={state.rawRepoContent || ""} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        )}
+      </div>
+    </main>
   );
 }
