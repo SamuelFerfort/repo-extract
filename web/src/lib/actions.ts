@@ -4,7 +4,7 @@ import { extract } from "repo-extract";
 import type { Action } from "./types";
 import { z } from "zod";
 import { analyzeRepo } from "./ai-service";
-import { UNIFICATION_PROMPT, CHUNK_ANALYSIS_PROMPT } from "./constants";
+import { UNIFICATION_PROMPT, CHUNK_ANALYSIS_PROMPT, FULL_REPO_ANALYSIS_PROMPT } from "./constants";
 import { ChunkFeedbackSchema, UnifiedFeedbackSchema } from "./schemas";
 
 export const generateRepoFeedback: Action = async (prevState, formData) => {
@@ -15,12 +15,14 @@ export const generateRepoFeedback: Action = async (prevState, formData) => {
       throw new Error("Invalid repository URL");
     }
 
-    // Extract repository content with 32k chunks
+    // Extract repository content with 32k token chunks
     const repoData = await extract({
       source: repoUrl,
       chunkSize: 32000,
     });
+
     let feedback;
+
     // If the repository is too large, analyze each chunk in parallel
     if (repoData.tokens > 50000) {
       console.log("Proccessing repository data in chunks");
@@ -44,12 +46,12 @@ export const generateRepoFeedback: Action = async (prevState, formData) => {
         UnifiedFeedbackSchema
       );
     } else {
-      // Analyze the entire repository content
 
+      // Analyze the entire repository content
       console.log("Analyzing entire repository content");
       feedback = await analyzeRepo(
         repoData.fullContent,
-        CHUNK_ANALYSIS_PROMPT,
+        FULL_REPO_ANALYSIS_PROMPT,
         UnifiedFeedbackSchema
       );
     }
