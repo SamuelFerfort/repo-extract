@@ -103,8 +103,8 @@ importers:
         specifier: ^19.0.0
         version: 19.0.0(react@19.0.0)
       repo-extract:
-        specifier: ^0.3.1
-        version: 0.3.1
+        specifier: ^0.4.1
+        version: 0.4.1
       sonner:
         specifier: ^1.7.1
         version: 1.7.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -2279,8 +2279,8 @@ packages:
     resolution: {integrity: sha512-dYqgNSZbDwkaJ2ceRd9ojCGjBq+mOm9LmtXnAnEGyHhN/5R7iDW2TRw3h+o/jCFxus3P2LfWIIiwowAjANm7IA==}
     engines: {node: '>= 0.4'}
 
-  repo-extract@0.3.1:
-    resolution: {integrity: sha512-GNLGfcupRs2/04f2bg9rEyXBibAgbet09GAAxR1YPNPQD41OfelgEWoEYnTQNSuC5XnZgchKCgSRo3rWJh/cWg==}
+  repo-extract@0.4.1:
+    resolution: {integrity: sha512-fIPFsPO0RvJSoBuU13kXYQce+3RpHJFDGBbmz+gK7C6yPMzr7kd8ypZn3zy1hZf1RNDDUryf4qLkD0kMRTFp9Q==}
     hasBin: true
 
   resolve-from@4.0.0:
@@ -4936,7 +4936,7 @@ snapshots:
       gopd: 1.2.0
       set-function-name: 2.0.2
 
-  repo-extract@0.3.1:
+  repo-extract@0.4.1:
     dependencies:
       commander: 11.1.0
       glob: 10.4.5

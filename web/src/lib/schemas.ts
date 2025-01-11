@@ -1,26 +1,46 @@
 import { z } from "zod";
 
-export const RepoFeedbackSchema = z.object({
-  security: z.object({
+const ScoreSection = z.object({
     score: z.number().min(0).max(100),
-    issues: z.array(z.string()),
-    recommendations: z.array(z.string())
-  }),
-  codeQuality: z.object({
-    score: z.number().min(0).max(100),
-    strengths: z.array(z.string()),
-    improvements: z.array(z.string())
-  }),
-  architecture: z.object({
-    score: z.number().min(0).max(100),
-    analysis: z.string(),
-    suggestions: z.array(z.string())
-  }),
-  performance: z.object({
-    score: z.number().min(0).max(100),
-    findings: z.array(z.string()),
-    optimizations: z.array(z.string())
-  })
-});
+    summary: z.string().max(120),
+    recommendations: z.array(z.string().max(200)).min(1).max(3),
+  });
+  
+  export const ChunkFeedbackSchema = z.object({
+    security: ScoreSection.extend({
+      criticalIssues: z.array(z.string()).max(5),
+      bestPractices: z.array(z.string()).max(5),
+    }),
+    maintainability: ScoreSection.extend({
+      technicalDebt: z.array(z.string()).max(5),
+      quickWins: z.array(z.string()).max(3),
+    }),
+    architecture: ScoreSection.extend({
+      patterns: z.array(z.string()).max(3),
+      scalabilityIssues: z.array(z.string()).max(3),
+    }),
+    reliability: ScoreSection.extend({
+      errorProne: z.array(z.string()).max(3),
+      robustness: z.array(z.string()).max(3),
+    }),
+  });
+  
+  export const UnifiedFeedbackSchema = z.object({
+    security: ScoreSection.extend({
+      criticalIssues: z.array(z.string()).max(2),
+      bestPractices: z.array(z.string()).max(3),
+    }),
+    maintainability: ScoreSection.extend({
+      technicalDebt: z.array(z.string()).max(3),
+      quickWins: z.array(z.string()).max(2),
+    }),
+    architecture: ScoreSection.extend({
+      patterns: z.array(z.string()).max(2),
+      scalabilityIssues: z.array(z.string()).max(2),
+    }),
+    reliability: ScoreSection.extend({
+      errorProne: z.array(z.string()).max(2),
+      robustness: z.array(z.string()).max(2),
+    }),
+  });
 
-export type RepoFeedback = z.infer<typeof RepoFeedbackSchema>;

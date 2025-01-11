@@ -16,6 +16,8 @@ import { ActionState } from "@/lib/types";
 import { generateRepoFeedback } from "@/lib/actions";
 import ScoreCard from "@/components/common/score-card";
 import { LoadingSkeleton } from "@/components/common/loading-skeleton";
+
+
 const initialState: ActionState = {
   feedback: null,
   error: null,
@@ -64,150 +66,34 @@ export default function Home() {
                 <ScoreCard
                   title="Security"
                   score={state.feedback.security.score}
-                >
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Issues</h4>
-                      <ul className="space-y-2">
-                        {state.feedback.security.issues.map((issue, i) => (
-                          <li
-                            key={i}
-                            className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between"
-                          >
-                            <span>{issue}</span>
-                            <CopyIcon textToCopy={issue} />
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Recommendations</h4>
-                      <ul className="space-y-2">
-                        {state.feedback.security.recommendations.map(
-                          (rec, i) => (
-                            <li
-                              key={i}
-                              className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between"
-                            >
-                              <span>{rec}</span>
-                              <CopyIcon textToCopy={rec} />
-                            </li>
-                          )
-                        )}
-                      </ul>
-                    </div>
-                  </div>
-                </ScoreCard>
+                  summary={state.feedback.security.summary}
+                  risks={state.feedback.security.criticalIssues}
+                  actions={state.feedback.security.bestPractices}
+                />
 
                 <ScoreCard
-                  title="Code Quality"
-                  score={state.feedback.codeQuality.score}
-                >
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Strengths</h4>
-                      <ul className="space-y-2">
-                        {state.feedback.codeQuality.strengths.map(
-                          (strength, i) => (
-                            <li
-                              key={i}
-                              className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between"
-                            >
-                              <span>{strength}</span>
-                              <CopyIcon textToCopy={strength} />
-                            </li>
-                          )
-                        )}
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Improvements</h4>
-                      <ul className="space-y-2">
-                        {state.feedback.codeQuality.improvements.map(
-                          (improvement, i) => (
-                            <li
-                              key={i}
-                              className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between"
-                            >
-                              <span>{improvement}</span>
-                              <CopyIcon textToCopy={improvement} />
-                            </li>
-                          )
-                        )}
-                      </ul>
-                    </div>
-                  </div>
-                </ScoreCard>
+                  title="Maintainability"
+                  score={state.feedback.maintainability.score}
+                  summary={state.feedback.maintainability.summary}
+                  risks={state.feedback.maintainability.technicalDebt}
+                  actions={state.feedback.maintainability.quickWins}
+                />
 
                 <ScoreCard
                   title="Architecture"
                   score={state.feedback.architecture.score}
-                >
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between">
-                      <span>{state.feedback.architecture.analysis}</span>
-                      <CopyIcon
-                        textToCopy={state.feedback.architecture.analysis}
-                      />
-                    </p>
-                    <div>
-                      <h4 className="font-medium mb-2">Suggestions</h4>
-                      <ul className="space-y-2">
-                        {state.feedback.architecture.suggestions.map(
-                          (suggestion, i) => (
-                            <li
-                              key={i}
-                              className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between"
-                            >
-                              <span>{suggestion}</span>
-                              <CopyIcon textToCopy={suggestion} />
-                            </li>
-                          )
-                        )}
-                      </ul>
-                    </div>
-                  </div>
-                </ScoreCard>
+                  summary={state.feedback.architecture.summary}
+                  risks={state.feedback.architecture.scalabilityIssues}
+                  actions={state.feedback.architecture.patterns}
+                />
 
                 <ScoreCard
-                  title="Performance"
-                  score={state.feedback.performance.score}
-                >
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium mb-2">Findings</h4>
-                      <ul className="space-y-2">
-                        {state.feedback.performance.findings.map(
-                          (finding, i) => (
-                            <li
-                              key={i}
-                              className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between"
-                            >
-                              <span>{finding}</span>
-                              <CopyIcon textToCopy={finding} />
-                            </li>
-                          )
-                        )}
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Optimizations</h4>
-                      <ul className="space-y-2">
-                        {state.feedback.performance.optimizations.map(
-                          (optimization, i) => (
-                            <li
-                              key={i}
-                              className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between"
-                            >
-                              <span>{optimization}</span>
-                              <CopyIcon textToCopy={optimization} />
-                            </li>
-                          )
-                        )}
-                      </ul>
-                    </div>
-                  </div>
-                </ScoreCard>
+                  title="Reliability"
+                  score={state.feedback.reliability.score}
+                  summary={state.feedback.reliability.summary}
+                  risks={state.feedback.reliability.errorProne}
+                  actions={state.feedback.reliability.robustness}
+                />
               </div>
             </TabsContent>
 

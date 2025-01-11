@@ -1,18 +1,21 @@
-import { RepoFeedbackSchema } from "./schemas";
+import { ChunkFeedbackSchema, UnifiedFeedbackSchema } from "./schemas";
 import { z } from "zod";
 
-export type RepoFeedback = z.infer<typeof RepoFeedbackSchema>;
+export type ChunkFeedback = z.infer<typeof ChunkFeedbackSchema>;
+export type UnifiedFeedback = z.infer<typeof UnifiedFeedbackSchema>;
+
+export type RepoFeedback = ChunkFeedback | UnifiedFeedback;
 
 export type FeedbackSuccess = {
   success: true;
-  data: ReturnType<typeof RepoFeedbackSchema.parse>;
+  data: UnifiedFeedback; 
 };
 
 export type ActionState = {
-    feedback: RepoFeedback | null;
-    error: string | null;
-    rawRepoContent: string | null;
-  };
+  feedback: UnifiedFeedback | null;
+  error: string | null;
+  rawRepoContent: string | null;
+};
 
 export type FeedbackError = {
   success: false;
@@ -21,15 +24,16 @@ export type FeedbackError = {
 
 export type FeedbackResult = FeedbackSuccess | FeedbackError;
 
-
 export type Action = (
-    prevState: ActionState,
-    formData: FormData
-  ) => Promise<ActionState>;
-
+  prevState: ActionState,
+  formData: FormData
+) => Promise<ActionState>;
 
 export interface ScoreCardProps {
-    title: string;
-    score: number;
-    children: React.ReactNode;
-  }
+  title: string;
+  score: number;
+  summary: string;
+  risks: string[]; // Maps to criticalIssues, technicalDebt, errorProne, etc.
+  actions: string[]; // Maps to recommendations, bestPractices, quickWins, etc.
+  children?: React.ReactNode;
+}
