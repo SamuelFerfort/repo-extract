@@ -7,12 +7,18 @@ import {
   formatTokens,
   generateTree,
   formatJson,
-  formatPlainText,
   formatMarkdown,
+  formatPlainText,
 } from "./formatter";
 import { encode } from "gpt-tokenizer";
 import fs from "fs/promises";
+import { chunkContent } from "./chunk";
 
+/**
+ * Extracts repository content and provides both full and chunked output.
+ * @param options - Configuration options for extraction.
+ * @returns Repository content in both full and chunked formats, along with metadata.
+ */
 export async function extract(
   options: RepoExtractOptions
 ): Promise<RepoExtractResult> {
@@ -23,6 +29,7 @@ export async function extract(
     excludePatterns = [],
     output,
     format = "text",
+    chunkSize = 4000, // Default chunk size for LLMs
   } = options;
 
   // Clone repository if source is a URL
@@ -59,18 +66,16 @@ export async function extract(
   // Generate outputs
   const tree = generateTree(workingDir, filteredFiles);
 
-  let content: string;
-  switch (format) {
-    case "json":
-      content = formatJson(processedFiles, tree, stats);
-      break;
-    case "markdown":
-      content = formatMarkdown(processedFiles, tree);
-      break;
-    default:
-      content = formatPlainText(processedFiles);
-  }
- 
+  // Generate full content
+  const fullContent = format === "json"
+    ? formatJson(processedFiles, tree, stats)
+    : format === "markdown"
+    ? formatMarkdown(processedFiles, tree)
+    : formatPlainText(processedFiles);
+
+  // Generate chunked content
+  const chunks = chunkContent(processedFiles, chunkSize, format);
+
   const summary = [
     `Files found: ${stats.filesFound}`,
     `Files excluded by patterns: ${stats.filesExcluded}`,
@@ -80,14 +85,23 @@ export async function extract(
     `Estimated tokens: ${formatTokens(stats.totalTokens)}`,
   ].join("\n");
 
+  // Write output to file if specified
   const outputPath =
     output === true ? "output.txt" : output ? output.toString() : null;
 
   if (outputPath) {
+    const outputContent = chunks.join("\n\n--- CHUNK ---\n\n"); // Combine chunks for file output
     format === "json" || format === "markdown"
-      ? await fs.writeFile(outputPath, content)
-      : await fs.writeFile(outputPath, `${tree}\n\n${content}`);
+      ? await fs.writeFile(outputPath, outputContent)
+      : await fs.writeFile(outputPath, `${tree}\n\n${outputContent}`);
   }
 
-  return { summary, tree, content, stats, tokens: stats.totalTokens};
+  return {
+    summary,
+    tree,
+    fullContent, // Full repository content as a single string
+    chunks, // Repository content split into chunks
+    stats,
+    tokens: stats.totalTokens,
+  };
 }

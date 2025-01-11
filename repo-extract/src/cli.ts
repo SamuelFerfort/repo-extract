@@ -18,6 +18,11 @@ program
     "Maximum file size to process in bytes",
     "10485760"
   )
+  .option(
+    "--chunk-size <size>",
+    "Maximum tokens per chunk (default: no chunking)",
+    parseInt
+  )
   .option("-e, --exclude <patterns...>", "Patterns to exclude")
   .option("-i, --include <patterns...>", "Patterns to include")
   .option(
@@ -54,6 +59,7 @@ program
         excludePatterns,
         output: options.output || defaultOutput,
         format: options.format,
+        chunkSize: options.chunkSize, 
       });
 
       console.log("\nSummary:");

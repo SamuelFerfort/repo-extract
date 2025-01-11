@@ -5,12 +5,14 @@ export interface RepoExtractOptions {
   excludePatterns?: string[];
   output?: string | boolean;
   format?: "text" | "json" | "markdown";
+  chunkSize?: number;
 }
 
 export interface RepoExtractResult {
   summary: string;
   tree: string;
-  content: string;
+  fullContent: string; // Full repository content as a single string
+  chunks: string[]; // Repository content split into chunks
   stats: {
     filesFound: number;
     filesExcluded: number;
@@ -39,4 +41,5 @@ export interface CliOptions {
   includeDocs?: boolean;
   dryRun?: boolean;
   format?: "text" | "json" | "markdown";
+  chunkSize?: number;
 }
