@@ -17,6 +17,7 @@ import { generateRepoFeedback } from "@/lib/actions";
 import ScoreCard from "@/components/common/score-card";
 import { LoadingSkeleton } from "@/components/common/loading-skeleton";
 import Hero from "@/components/layout/hero";
+import { Loader2 } from "lucide-react";
 
 const initialState: ActionState = {
   feedback: null,
@@ -45,7 +46,14 @@ export default function Home() {
             disabled={isPending}
           />
           <Button type="submit" disabled={isPending}>
-            {isPending ? "Analyzing..." : "Analyze Repository"}
+            {isPending ? (
+              <>
+                {" "}
+                <Loader2 className="animate-spin" /> Analyzing...
+              </>
+            ) : (
+              "Analyze Repository"
+            )}
           </Button>
         </form>
 
