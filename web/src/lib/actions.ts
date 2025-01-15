@@ -4,7 +4,11 @@ import { extract } from "repo-extract";
 import type { Action } from "./types";
 import { z } from "zod";
 import { analyzeRepo } from "./ai-service";
-import { UNIFICATION_PROMPT, CHUNK_ANALYSIS_PROMPT, FULL_REPO_ANALYSIS_PROMPT } from "./constants";
+import {
+  UNIFICATION_PROMPT,
+  CHUNK_ANALYSIS_PROMPT,
+  FULL_REPO_ANALYSIS_PROMPT,
+} from "./constants";
 import { ChunkFeedbackSchema, UnifiedFeedbackSchema } from "./schemas";
 
 export const generateRepoFeedback: Action = async (prevState, formData) => {
@@ -21,8 +25,10 @@ export const generateRepoFeedback: Action = async (prevState, formData) => {
       chunkSize: 32000,
     });
 
+    if (!repoData.fullContent) {
+      throw new Error("Invalid repository URL");
+    }
     let feedback;
-
     // If the repository is too large, analyze each chunk in parallel
     if (repoData.tokens > 50000) {
       console.log("Proccessing repository data in chunks");
@@ -32,27 +38,25 @@ export const generateRepoFeedback: Action = async (prevState, formData) => {
           return await analyzeRepo(
             chunk,
             CHUNK_ANALYSIS_PROMPT,
-            ChunkFeedbackSchema
+            ChunkFeedbackSchema,
           );
-        })
+        }),
       );
 
-      const combinedFeedbackPrompt = `Combine and unify the following feedback into a single, coherent analysis: ${JSON.stringify(
-        chunkResults
+      const combinedFeedbackPrompt = `Combine and unify the following feedback into a single, coherent analysis, do NOT repeat the same feedback in multiple sections: ${JSON.stringify(
+        chunkResults,
       )}`;
       feedback = await analyzeRepo(
         combinedFeedbackPrompt,
         UNIFICATION_PROMPT,
-        UnifiedFeedbackSchema
+        UnifiedFeedbackSchema,
       );
     } else {
-
       // Analyze the entire repository content
-      console.log("Analyzing entire repository content");
       feedback = await analyzeRepo(
         repoData.fullContent,
         FULL_REPO_ANALYSIS_PROMPT,
-        UnifiedFeedbackSchema
+        UnifiedFeedbackSchema,
       );
     }
 
@@ -69,8 +73,8 @@ export const generateRepoFeedback: Action = async (prevState, formData) => {
       error instanceof z.ZodError
         ? "Failed to analyze repository. Please try again."
         : error instanceof Error
-        ? error.message
-        : "An unexpected error occurred";
+          ? error.message
+          : "An unexpected error occurred";
 
     return { ...prevState, error: errorMessage };
   }

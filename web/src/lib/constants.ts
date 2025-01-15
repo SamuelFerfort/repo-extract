@@ -77,7 +77,6 @@ export const CHUNK_ANALYSIS_PROMPT = `You are an expert code reviewer focused on
 }
 `;
 
-
 export const UNIFICATION_PROMPT = `You are an expert code reviewer focused on actionable insights. Combine and unify feedback from multiple chunks of the repository into a single, coherent analysis. Your response must be a valid JSON object that strictly adheres to the provided schema. Do not include any additional text, explanations, or formatting outside the JSON object.
 
 ---
@@ -156,9 +155,8 @@ export const UNIFICATION_PROMPT = `You are an expert code reviewer focused on ac
     ]
   }
 }
+Make sure you don't include any additional text, explanations, or formatting outside the JSON object. Do NOT repeat the same feedback in multiple sections. 
 `;
-
-
 
 export const FULL_REPO_ANALYSIS_PROMPT = `You are an expert code reviewer focused on providing comprehensive analysis of an entire codebase. Analyze the provided repository content and provide feedback in strict JSON format. Your response must be a valid JSON object that strictly adheres to the provided schema. Do not include any additional text, explanations, or formatting outside the JSON object.
 
@@ -239,4 +237,7 @@ export const FULL_REPO_ANALYSIS_PROMPT = `You are an expert code reviewer focuse
     ]
   }
 }
+
+Make sure you don't include any additional text, explanations, or formatting outside the JSON object. Do NOT repeat the same feedback in multiple sections. 
 `;
+

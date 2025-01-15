@@ -16,6 +16,7 @@ import { ActionState } from "@/lib/types";
 import { generateRepoFeedback } from "@/lib/actions";
 import ScoreCard from "@/components/common/score-card";
 import { LoadingSkeleton } from "@/components/common/loading-skeleton";
+import Hero from "@/components/layout/hero";
 
 const initialState: ActionState = {
   feedback: null,
@@ -27,12 +28,13 @@ const initialState: ActionState = {
 export default function Home() {
   const [state, formAction, isPending] = useActionState(
     generateRepoFeedback,
-    initialState
+    initialState,
   );
 
   return (
-    <main className="min-h-screen p-8">
+    <main className="min-h-screen p-8  ">
       <div className="max-w-6xl mx-auto space-y-8">
+        <Hero />
         <form action={formAction} className="flex gap-2">
           <Input
             type="url"

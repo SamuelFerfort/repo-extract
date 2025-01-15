@@ -10,17 +10,10 @@ const CopyIcon = ({ textToCopy }: { textToCopy: string }) => {
     try {
       await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
-      toast.success("Link copied to clipboard", {
+      toast.success("Repository content copied to clipboard", {
         position: "bottom-right",
         duration: 2000,
         className: "select-none",
-        description: (
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-gray-400 truncate max-w-[300px]">
-              {textToCopy}
-            </span>
-          </div>
-        ),
       });
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -64,3 +57,4 @@ const CopyIcon = ({ textToCopy }: { textToCopy: string }) => {
 };
 
 export default CopyIcon;
+
