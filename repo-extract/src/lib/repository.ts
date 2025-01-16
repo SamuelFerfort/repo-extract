@@ -1,17 +1,17 @@
 import fs from "fs/promises";
 import path from "path";
-import os from "os";
 import JSZip from "jszip";
-import { Readable } from "stream";
 
 export async function cloneRepository(source: string): Promise<string> {
-  // Check if source is a local path
-  try {
-    const stats = await fs.stat(source);
-    if (stats.isDirectory()) {
-      return source;
-    }
-  } catch {} // If stat fails, assume it's a GitHub URL
+  // Check if source is a local path (only in development)
+  if (process.env.NODE_ENV === "development") {
+    try {
+      const stats = await fs.stat(source);
+      if (stats.isDirectory()) {
+        return source;
+      }
+    } catch {} // If stat fails, assume it's a GitHub URL
+  }
 
   // Extract owner/repo from GitHub URL
   const match = source.match(/github\.com\/([^\/]+)\/([^\/]+)/);
@@ -23,9 +23,8 @@ export async function cloneRepository(source: string): Promise<string> {
 
   const [_, owner, repo] = match;
   const cleanRepo = repo.replace(".git", "");
-  const tmpDir = path.join(os.tmpdir(), "repo-to-text", Date.now().toString());
 
-  // Get the zip directly from GitHub's download URL (no API needed!)
+  // Get the zip directly from GitHub's download URL
   const zipUrl = `https://github.com/${owner}/${cleanRepo}/archive/refs/heads/main.zip`;
   const response = await fetch(zipUrl);
 
@@ -39,37 +38,47 @@ export async function cloneRepository(source: string): Promise<string> {
     }
 
     const arrayBuffer = await masterResponse.arrayBuffer();
-    return await extractZip(Buffer.from(arrayBuffer), tmpDir);
+    return await processZipContent(Buffer.from(arrayBuffer));
   }
 
   const arrayBuffer = await response.arrayBuffer();
-  return await extractZip(Buffer.from(arrayBuffer), tmpDir);
+  return await processZipContent(Buffer.from(arrayBuffer));
 }
 
-async function extractZip(buffer: Buffer, tmpDir: string): Promise<string> {
+async function processZipContent(buffer: Buffer): Promise<string> {
   const zip = await JSZip.loadAsync(buffer);
-
-  // Create temp directory
-  await fs.mkdir(tmpDir, { recursive: true });
-
-  // Extract all files
   const entries = Object.entries(zip.files);
-  const rootFolder = entries[0][0].split("/")[0]; // Get the root folder name
+  const rootFolder = entries[0][0].split("/")[0];
 
+  // Instead of writing to disk, we'll create a virtual file system in memory
+  const virtualFs: Record<string, string> = {};
+
+  // Process all files
   for (const [zipPath, file] of entries) {
     if (file.dir) continue;
 
     // Remove the root folder from the path
     const relativePath = zipPath.replace(rootFolder + "/", "");
-    const filePath = path.join(tmpDir, relativePath);
 
-    // Create directory if it doesn't exist
-    await fs.mkdir(path.dirname(filePath), { recursive: true });
-
-    // Extract and write file
-    const content = await file.async("nodebuffer");
-    await fs.writeFile(filePath, content);
+    // Get file content
+    const content = await file.async("text");
+    virtualFs[relativePath] = content;
   }
 
-  return tmpDir;
+  // Return a special path that our other functions will recognize
+  return `memory://${JSON.stringify(virtualFs)}`;
+}
+
+// Add this to your files.ts
+export async function readVirtualFile(
+  virtualPath: string,
+  filePath: string,
+): Promise<string> {
+  if (virtualPath.startsWith("memory://")) {
+    const virtualFs = JSON.parse(virtualPath.replace("memory://", ""));
+    return virtualFs[filePath] || "";
+  }
+
+  // Fall back to regular file system
+  return fs.readFile(path.join(virtualPath, filePath), "utf-8");
 }
