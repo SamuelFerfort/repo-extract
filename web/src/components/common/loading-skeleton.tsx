@@ -2,15 +2,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export function LoadingSkeleton() {
-  const categories = ["Security", "Code Quality", "Architecture", "Performance"];
-  
+  const categories = [
+    "Security",
+    "Code Quality",
+    "Architecture",
+    "Performance",
+  ];
+
   return (
     <div className="space-y-4 animate-in fade-in duration-700">
       <div className="h-10 flex items-center space-x-4 pb-4">
         <Skeleton className="h-9 w-24" />
         <Skeleton className="h-9 w-24" />
       </div>
-
       <div className="grid gap-4 md:grid-cols-2">
         {categories.map((category) => (
           <Card key={category} className="relative overflow-hidden">

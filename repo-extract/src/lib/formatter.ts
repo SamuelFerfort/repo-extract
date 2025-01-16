@@ -53,7 +53,7 @@ export function formatMarkdown(files: ExtractedFile[], tree: string): string {
       `### ${file.path}\n`,
       "```" + (getFileExtension(file.path) || ""),
       file.content,
-      "```\n"
+      "```\n",
     );
   });
 
@@ -63,7 +63,7 @@ export function formatMarkdown(files: ExtractedFile[], tree: string): string {
 export function formatJson(
   files: ExtractedFile[],
   tree: string,
-  stats: Record<string, any>
+  stats: Record<string, any>,
 ): string {
   const output = {
     stats,
@@ -71,11 +71,37 @@ export function formatJson(
     files: files.map((file) => ({
       path: file.path,
       size: file.size,
-      content: file.content,
+      // Sanitize content to ensure valid JSON
+      content: file.content
+        // Handle null bytes and control characters
+        .replace(/[\u0000-\u001F\u007F-\u009F]/g, "")
+        // Handle potential line ending issues
+        .replace(/\r\n/g, "\n"),
     })),
   };
 
-  return JSON.stringify(output, null, 2);
+  try {
+    // Test if we can parse it first
+    const jsonString = JSON.stringify(output, null, 2);
+    JSON.parse(jsonString); // This will throw if invalid
+    return jsonString;
+  } catch (error) {
+    console.error("Failed to create valid JSON:", error);
+    // Return a simplified version without content if there's an issue
+    return JSON.stringify(
+      {
+        stats,
+        directoryStructure: tree.split("\n"),
+        files: files.map((file) => ({
+          path: file.path,
+          size: file.size,
+          content: "[Content omitted due to JSON encoding issues]",
+        })),
+      },
+      null,
+      2,
+    );
+  }
 }
 
 function getFileExtension(filePath: string): string {

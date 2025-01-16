@@ -1,6 +1,6 @@
 {
     "name": "repo-extract",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "description": "CLI tool to analyze and create text dumps of codebases for LLMs",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -36,6 +36,7 @@
         "commander": "^11.1.0",
         "glob": "^10.3.10",
         "gpt-tokenizer": "^2.1.2",
+        "jszip": "^3.10.1",
         "minimatch": "^10.0.1",
         "simple-git": "^3.22.0"
     },

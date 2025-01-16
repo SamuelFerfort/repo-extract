@@ -20,7 +20,7 @@ import { chunkContent } from "./chunk";
  * @returns Repository content in both full and chunked formats, along with metadata.
  */
 export async function extract(
-  options: RepoExtractOptions
+  options: RepoExtractOptions,
 ): Promise<RepoExtractResult> {
   const {
     source,
@@ -44,14 +44,14 @@ export async function extract(
   const filteredFiles = await getFilteredFiles(
     workingDir,
     allPatterns,
-    includePatterns
+    includePatterns,
   );
 
   // Process files
   const processedFiles = await processFiles(
     workingDir,
     filteredFiles,
-    maxFileSize
+    maxFileSize,
   );
 
   // Calculate statistics
@@ -66,15 +66,20 @@ export async function extract(
   // Generate outputs
   const tree = generateTree(workingDir, filteredFiles);
 
-  // Generate full content
-  const fullContent = format === "json"
-    ? formatJson(processedFiles, tree, stats)
-    : format === "markdown"
-    ? formatMarkdown(processedFiles, tree)
-    : formatPlainText(processedFiles);
+  // Generate full content and chunks based on format
+  let fullContent: string;
+  let chunks: string[];
 
-  // Generate chunked content
-  const chunks = chunkContent(processedFiles, chunkSize, format);
+  if (format === "json") {
+    fullContent = formatJson(processedFiles, tree, stats);
+    chunks = [fullContent]; // For JSON, we don't actually chunk
+  } else {
+    fullContent =
+      format === "markdown"
+        ? formatMarkdown(processedFiles, tree)
+        : formatPlainText(processedFiles);
+    chunks = chunkContent(processedFiles, chunkSize, format);
+  }
 
   const summary = [
     `Files found: ${stats.filesFound}`,
@@ -90,12 +95,16 @@ export async function extract(
     output === true ? "output.txt" : output ? output.toString() : null;
 
   if (outputPath) {
-    const outputContent = chunks.join("\n\n--- CHUNK ---\n\n"); // Combine chunks for file output
-    format === "json" || format === "markdown"
-      ? await fs.writeFile(outputPath, outputContent)
-      : await fs.writeFile(outputPath, `${tree}\n\n${outputContent}`);
+    if (format === "json") {
+      await fs.writeFile(outputPath, fullContent);
+    } else {
+      const outputContent = chunks.join("\n\n--- CHUNK ---\n\n");
+      await fs.writeFile(
+        outputPath,
+        format === "markdown" ? outputContent : `${tree}\n\n${outputContent}`,
+      );
+    }
   }
-
   return {
     summary,
     tree,
