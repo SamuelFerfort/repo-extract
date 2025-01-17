@@ -2,7 +2,15 @@ import fs from "fs/promises";
 import path from "path";
 import JSZip from "jszip";
 
-export async function cloneRepository(source: string): Promise<string> {
+export type FileEntry = {
+  path: string;
+  content: string;
+  size: number;
+};
+
+export async function cloneRepository(
+  source: string,
+): Promise<string | FileEntry[]> {
   // Check if source is a local path (only in development)
   if (process.env.NODE_ENV === "development") {
     try {
@@ -10,7 +18,7 @@ export async function cloneRepository(source: string): Promise<string> {
       if (stats.isDirectory()) {
         return source;
       }
-    } catch {} // If stat fails, assume it's a GitHub URL
+    } catch {}
   }
 
   // Extract owner/repo from GitHub URL
@@ -24,61 +32,84 @@ export async function cloneRepository(source: string): Promise<string> {
   const [_, owner, repo] = match;
   const cleanRepo = repo.replace(".git", "");
 
-  // Get the zip directly from GitHub's download URL
-  const zipUrl = `https://github.com/${owner}/${cleanRepo}/archive/refs/heads/main.zip`;
-  const response = await fetch(zipUrl);
+  // Check repository size first
+  const sizeResponse = await fetch(
+    `https://api.github.com/repos/${owner}/${cleanRepo}`,
+    {
+      headers: process.env.GITHUB_TOKEN
+        ? {
+            Authorization: `token ${process.env.GITHUB_TOKEN}`,
+          }
+        : {},
+      signal: AbortSignal.timeout(10000),
+    },
+  );
 
+  if (!sizeResponse.ok) {
+    throw new Error(
+      `Failed to check repository size: ${sizeResponse.statusText}`,
+    );
+  }
+
+  const repoInfo = await sizeResponse.json();
+  if (repoInfo.size > 50000) {
+    // 50MB limit
+    throw new Error("Repository too large for analysis");
+  }
+
+  // Try main branch first
+  let response = await fetch(
+    `https://github.com/${owner}/${cleanRepo}/archive/refs/heads/main.zip`,
+    { signal: AbortSignal.timeout(25000) },
+  );
+
+  // Try master if main fails
   if (!response.ok) {
-    // Try master if main fails
-    const masterUrl = `https://github.com/${owner}/${cleanRepo}/archive/refs/heads/master.zip`;
-    const masterResponse = await fetch(masterUrl);
+    response = await fetch(
+      `https://github.com/${owner}/${cleanRepo}/archive/refs/heads/master.zip`,
+      { signal: AbortSignal.timeout(25000) },
+    );
 
-    if (!masterResponse.ok) {
+    if (!response.ok) {
       throw new Error(`Failed to download repository: ${response.statusText}`);
     }
-
-    const arrayBuffer = await masterResponse.arrayBuffer();
-    return await processZipContent(Buffer.from(arrayBuffer));
   }
 
+  // Process ZIP content
   const arrayBuffer = await response.arrayBuffer();
-  return await processZipContent(Buffer.from(arrayBuffer));
-}
+  const zip = await JSZip.loadAsync(Buffer.from(arrayBuffer));
+  const files: FileEntry[] = [];
+  const rootFolder = Object.keys(zip.files)[0].split("/")[0];
 
-async function processZipContent(buffer: Buffer): Promise<string> {
-  const zip = await JSZip.loadAsync(buffer);
-  const entries = Object.entries(zip.files);
-  const rootFolder = entries[0][0].split("/")[0];
-
-  // Instead of writing to disk, we'll create a virtual file system in memory
-  const virtualFs: Record<string, string> = {};
-
-  // Process all files
-  for (const [zipPath, file] of entries) {
+  for (const [zipPath, file] of Object.entries(zip.files)) {
     if (file.dir) continue;
 
-    // Remove the root folder from the path
-    const relativePath = zipPath.replace(rootFolder + "/", "");
-
-    // Get file content
-    const content = await file.async("text");
-    virtualFs[relativePath] = content;
+    try {
+      const relativePath = zipPath.replace(rootFolder + "/", "");
+      const content = await file.async("text");
+      files.push({
+        path: relativePath,
+        content,
+        size: content.length,
+      });
+    } catch (error) {
+      console.error(`Failed to process file ${zipPath}:`, error);
+    }
   }
 
-  // Return a special path that our other functions will recognize
-  return `memory://${JSON.stringify(virtualFs)}`;
-}
-
-// Add this to your files.ts
-export async function readVirtualFile(
-  virtualPath: string,
-  filePath: string,
-): Promise<string> {
-  if (virtualPath.startsWith("memory://")) {
-    const virtualFs = JSON.parse(virtualPath.replace("memory://", ""));
-    return virtualFs[filePath] || "";
+  if (process.env.VERCEL) {
+    return files;
   }
 
-  // Fall back to regular file system
-  return fs.readFile(path.join(virtualPath, filePath), "utf-8");
+  // For local development, still use filesystem
+  const tmpDir = path.join(process.cwd(), "tmp", Date.now().toString());
+  await fs.mkdir(tmpDir, { recursive: true });
+
+  for (const file of files) {
+    const filePath = path.join(tmpDir, file.path);
+    await fs.mkdir(path.dirname(filePath), { recursive: true });
+    await fs.writeFile(filePath, file.content);
+  }
+
+  return tmpDir;
 }

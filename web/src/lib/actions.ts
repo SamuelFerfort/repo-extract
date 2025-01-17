@@ -15,6 +15,7 @@ export const generateRepoFeedback: Action = async (prevState, formData) => {
   try {
     const repoUrl = formData.get("url");
 
+    console.log("Starting analysis for:", repoUrl);
     if (!repoUrl || typeof repoUrl !== "string") {
       throw new Error("Invalid repository URL");
     }
@@ -25,6 +26,7 @@ export const generateRepoFeedback: Action = async (prevState, formData) => {
       chunkSize: 32000,
     });
 
+    console.log(`Repository extracted in ${Date.now() - startTime}ms`);
     if (!repoData.fullContent) {
       throw new Error("Invalid repository URL");
     }

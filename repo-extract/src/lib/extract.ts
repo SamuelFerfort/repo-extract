@@ -1,7 +1,9 @@
 import { RepoExtractOptions, RepoExtractResult } from "../types";
 import { DEFAULT_IGNORE_PATTERNS } from "../constants/patterns";
-import { cloneRepository } from "./repository";
+import { cloneRepository, FileEntry } from "./repository";
 import { getFilteredFiles, processFiles } from "./files";
+import { minimatch } from "minimatch";
+import { ExtractedFile } from "../types";
 import {
   formatSize,
   formatTokens,
@@ -14,57 +16,82 @@ import { encode } from "gpt-tokenizer";
 import fs from "fs/promises";
 import { chunkContent } from "./chunk";
 
-/**
- * Extracts repository content and provides both full and chunked output.
- * @param options - Configuration options for extraction.
- * @returns Repository content in both full and chunked formats, along with metadata.
- */
 export async function extract(
   options: RepoExtractOptions,
 ): Promise<RepoExtractResult> {
   const {
     source,
-    maxFileSize = 10 * 1024 * 1024, // 10MB default
+    maxFileSize = 10 * 1024 * 1024,
     includePatterns = [],
     excludePatterns = [],
     output,
     format = "text",
-    chunkSize = 4000, // Default chunk size for LLMs
+    chunkSize = 4000,
   } = options;
 
-  // Clone repository if source is a URL
-  const workingDir =
+  // Clone repository or get files
+  const result =
     source.startsWith("http") || source.startsWith("git@")
       ? await cloneRepository(source)
       : source;
 
-  // Get and filter files
-  const allPatterns = [...DEFAULT_IGNORE_PATTERNS, ...(excludePatterns || [])];
-  const allFiles = await getFilteredFiles(workingDir, [], []); // Get all files first
-  const filteredFiles = await getFilteredFiles(
-    workingDir,
-    allPatterns,
-    includePatterns,
-  );
+  let processedFiles: ExtractedFile[];
+  let allFilesCount: number;
 
-  // Process files
-  const processedFiles = await processFiles(
-    workingDir,
-    filteredFiles,
-    maxFileSize,
-  );
+  if (Array.isArray(result)) {
+    // Handle array of files (from Vercel environment)
+    const filtered = result.filter((file) => {
+      if (file.size > maxFileSize) return false;
+      const include =
+        includePatterns.length === 0 ||
+        includePatterns.some((pattern) => minimatch(file.path, pattern));
+      const exclude = excludePatterns.some((pattern) =>
+        minimatch(file.path, pattern),
+      );
+      return include && !exclude;
+    });
+
+    processedFiles = filtered.map((file) => ({
+      path: file.path,
+      content: file.content,
+      size: file.size,
+    }));
+    allFilesCount = result.length;
+  } else {
+    // Handle directory path (local development)
+    const allPatterns = [
+      ...DEFAULT_IGNORE_PATTERNS,
+      ...(excludePatterns || []),
+    ];
+    const allFiles = await getFilteredFiles(result, [], []);
+    const filteredFiles = await getFilteredFiles(
+      result,
+      allPatterns,
+      includePatterns,
+    );
+    processedFiles = await processFiles(result, filteredFiles, maxFileSize);
+    allFilesCount = allFiles.length;
+  }
 
   // Calculate statistics
   const stats = {
-    filesFound: allFiles.length,
-    filesExcluded: allFiles.length - filteredFiles.length,
-    filesSkipped: filteredFiles.length - processedFiles.length,
+    filesFound: allFilesCount,
+    filesExcluded: allFilesCount - processedFiles.length,
+    filesSkipped: 0, // We're handling size limits in filtering now
     totalSize: processedFiles.reduce((acc, file) => acc + file.size, 0),
     totalTokens: encode(processedFiles.map((f) => f.content).join("\n")).length,
   };
 
-  // Generate outputs
-  const tree = generateTree(workingDir, filteredFiles);
+  // Generate tree visualization
+  const tree = Array.isArray(result)
+    ? [
+        "Directory structure:",
+        ...processedFiles.map((f) => `└── ${f.path}`),
+      ].join("\n")
+    : generateTree(
+        result,
+        processedFiles.map((f) => f.path),
+      );
 
   // Generate full content and chunks based on format
   let fullContent: string;
@@ -72,7 +99,7 @@ export async function extract(
 
   if (format === "json") {
     fullContent = formatJson(processedFiles, tree, stats);
-    chunks = [fullContent]; // For JSON, we don't actually chunk
+    chunks = [fullContent];
   } else {
     fullContent =
       format === "markdown"
@@ -91,10 +118,8 @@ export async function extract(
   ].join("\n");
 
   // Write output to file if specified
-  const outputPath =
-    output === true ? "output.txt" : output ? output.toString() : null;
-
-  if (outputPath) {
+  if (output) {
+    const outputPath = output === true ? "output.txt" : output.toString();
     if (format === "json") {
       await fs.writeFile(outputPath, fullContent);
     } else {
@@ -105,11 +130,12 @@ export async function extract(
       );
     }
   }
+
   return {
     summary,
     tree,
-    fullContent, // Full repository content as a single string
-    chunks, // Repository content split into chunks
+    fullContent,
+    chunks,
     stats,
     tokens: stats.totalTokens,
   };

@@ -8,6 +8,12 @@ export interface RepoExtractOptions {
   chunkSize?: number;
 }
 
+export interface ExtractedFile {
+  path: string;
+  content: string;
+  size: number;
+}
+
 export interface RepoExtractResult {
   summary: string;
   tree: string;
@@ -22,16 +28,6 @@ export interface RepoExtractResult {
   };
   tokens: number;
 }
-export interface ExtractedFile {
-  path: string;
-  content: string;
-  size: number;
-}
-export interface ExtractedFile {
-  path: string;
-  content: string;
-  size: number;
-}
 
 export interface CliOptions {
   output?: string;
@@ -42,4 +38,13 @@ export interface CliOptions {
   dryRun?: boolean;
   format?: "text" | "json" | "markdown";
   chunkSize?: number;
+}
+export interface FileEntry {
+  path: string;
+  content: string;
+  size: number;
+}
+
+export interface ExtractedFile extends FileEntry {
+  //  any additional fields for ExtractedFile
 }
