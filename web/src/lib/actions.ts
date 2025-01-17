@@ -15,11 +15,12 @@ export const generateRepoFeedback: Action = async (prevState, formData) => {
   try {
     const repoUrl = formData.get("url");
 
-    console.log("Starting analysis for:", repoUrl);
     if (!repoUrl || typeof repoUrl !== "string") {
       throw new Error("Invalid repository URL");
     }
 
+    console.log("Starting analysis for:", repoUrl);
+    const startTime = Date.now();
     // Extract repository content with 32k token chunks
     const repoData = await extract({
       source: repoUrl,
