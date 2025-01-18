@@ -1,12 +1,5 @@
 "use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -76,7 +69,6 @@ export default function Home() {
                 <ScoreCard
                   title="Security"
                   score={state.feedback.security.score}
-                  summary={state.feedback.security.summary}
                   risks={state.feedback.security.criticalIssues}
                   actions={state.feedback.security.bestPractices}
                 />
@@ -84,7 +76,6 @@ export default function Home() {
                 <ScoreCard
                   title="Maintainability"
                   score={state.feedback.maintainability.score}
-                  summary={state.feedback.maintainability.summary}
                   risks={state.feedback.maintainability.technicalDebt}
                   actions={state.feedback.maintainability.quickWins}
                 />
@@ -92,7 +83,6 @@ export default function Home() {
                 <ScoreCard
                   title="Architecture"
                   score={state.feedback.architecture.score}
-                  summary={state.feedback.architecture.summary}
                   risks={state.feedback.architecture.scalabilityIssues}
                   actions={state.feedback.architecture.patterns}
                 />
@@ -100,7 +90,6 @@ export default function Home() {
                 <ScoreCard
                   title="Reliability"
                   score={state.feedback.reliability.score}
-                  summary={state.feedback.reliability.summary}
                   risks={state.feedback.reliability.errorProne}
                   actions={state.feedback.reliability.robustness}
                 />
@@ -108,17 +97,10 @@ export default function Home() {
             </TabsContent>
 
             <TabsContent value="raw">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Raw Repository Content</CardTitle>
-                  <CardDescription>
-                    Copy the raw content to use with your preferred LLM
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex justify-end">
-                  <CopyIcon textToCopy={state.rawRepoContent || ""} />
-                </CardContent>
-              </Card>
+              <Button className="flex items-center gap-2 text-sm ">
+                <span>Raw Text </span>
+                <CopyIcon textToCopy={state.rawRepoContent || ""} />
+              </Button>
             </TabsContent>
           </Tabs>
         )}

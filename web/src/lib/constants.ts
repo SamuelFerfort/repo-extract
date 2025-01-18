@@ -12,7 +12,6 @@ export const CHUNK_ANALYSIS_PROMPT = `You are an expert code reviewer focused on
 {
   "security": {
     "score": 0-100, // A score between 0 and 100
-    "summary": "A brief summary of security issues and strengths.", // Max 120 characters
     "recommendations": [
       "Actionable recommendation 1", // Max 200 characters
       "Actionable recommendation 2" // Max 3 recommendations
@@ -28,7 +27,6 @@ export const CHUNK_ANALYSIS_PROMPT = `You are an expert code reviewer focused on
   },
   "maintainability": {
     "score": 0-100,
-    "summary": "A brief summary of maintainability issues and strengths.", // Max 120 characters
     "recommendations": [
       "Actionable recommendation 1", // Max 200 characters
       "Actionable recommendation 2" // Max 3 recommendations
@@ -44,7 +42,6 @@ export const CHUNK_ANALYSIS_PROMPT = `You are an expert code reviewer focused on
   },
   "architecture": {
     "score": 0-100,
-    "summary": "A brief summary of architectural issues and strengths.", // Max 120 characters
     "recommendations": [
       "Actionable recommendation 1", // Max 200 characters
       "Actionable recommendation 2" // Max 3 recommendations
@@ -60,7 +57,6 @@ export const CHUNK_ANALYSIS_PROMPT = `You are an expert code reviewer focused on
   },
   "reliability": {
     "score": 0-100,
-    "summary": "A brief summary of reliability issues and strengths.", // Max 120 characters
     "recommendations": [
       "Actionable recommendation 1", // Max 200 characters
       "Actionable recommendation 2" // Max 3 recommendations
@@ -92,7 +88,6 @@ export const UNIFICATION_PROMPT = `You are an expert code reviewer focused on ac
 {
   "security": {
     "score": 0-100, // A score between 0 and 100
-    "summary": "A brief summary of security issues and strengths.", // Max 120 characters
     "recommendations": [
       "Actionable recommendation 1", // Max 200 characters
       "Actionable recommendation 2" // Max 3 recommendations
@@ -108,7 +103,6 @@ export const UNIFICATION_PROMPT = `You are an expert code reviewer focused on ac
   },
   "maintainability": {
     "score": 0-100,
-    "summary": "A brief summary of maintainability issues and strengths.", // Max 120 characters
     "recommendations": [
       "Actionable recommendation 1", // Max 200 characters
       "Actionable recommendation 2" // Max 3 recommendations
@@ -124,7 +118,6 @@ export const UNIFICATION_PROMPT = `You are an expert code reviewer focused on ac
   },
   "architecture": {
     "score": 0-100,
-    "summary": "A brief summary of architectural issues and strengths.", // Max 120 characters
     "recommendations": [
       "Actionable recommendation 1", // Max 200 characters
       "Actionable recommendation 2" // Max 3 recommendations
@@ -140,7 +133,6 @@ export const UNIFICATION_PROMPT = `You are an expert code reviewer focused on ac
   },
   "reliability": {
     "score": 0-100,
-    "summary": "A brief summary of reliability issues and strengths.", // Max 120 characters
     "recommendations": [
       "Actionable recommendation 1", // Max 200 characters
       "Actionable recommendation 2" // Max 3 recommendations
@@ -174,7 +166,6 @@ export const FULL_REPO_ANALYSIS_PROMPT = `You are an expert code reviewer focuse
 {
   "security": {
     "score": 0-100, // A score between 0 and 100
-    "summary": "A brief summary of security issues and strengths.", // Max 120 characters
     "recommendations": [
       "Actionable recommendation 1", // Max 200 characters
       "Actionable recommendation 2" // Max 3 recommendations
@@ -190,7 +181,6 @@ export const FULL_REPO_ANALYSIS_PROMPT = `You are an expert code reviewer focuse
   },
   "maintainability": {
     "score": 0-100,
-    "summary": "A brief summary of maintainability issues and strengths.", // Max 120 characters
     "recommendations": [
       "Actionable recommendation 1", // Max 200 characters
       "Actionable recommendation 2" // Max 3 recommendations
@@ -206,7 +196,6 @@ export const FULL_REPO_ANALYSIS_PROMPT = `You are an expert code reviewer focuse
   },
   "architecture": {
     "score": 0-100,
-    "summary": "A brief summary of architectural issues and strengths.", // Max 120 characters
     "recommendations": [
       "Actionable recommendation 1", // Max 200 characters
       "Actionable recommendation 2" // Max 3 recommendations
@@ -222,7 +211,6 @@ export const FULL_REPO_ANALYSIS_PROMPT = `You are an expert code reviewer focuse
   },
   "reliability": {
     "score": 0-100,
-    "summary": "A brief summary of reliability issues and strengths.", // Max 120 characters
     "recommendations": [
       "Actionable recommendation 1", // Max 200 characters
       "Actionable recommendation 2" // Max 3 recommendations
@@ -240,4 +228,3 @@ export const FULL_REPO_ANALYSIS_PROMPT = `You are an expert code reviewer focuse
 
 Make sure you don't include any additional text, explanations, or formatting outside the JSON object. Do NOT repeat the same feedback in multiple sections. 
 `;
-

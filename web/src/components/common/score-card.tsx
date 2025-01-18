@@ -2,13 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Progress } from "../ui/progress";
 import { ScoreCardProps } from "@/lib/types";
 
-
-
-
 export default function ScoreCard({
   title,
   score,
-  summary,
   risks,
   actions,
 }: ScoreCardProps) {
@@ -23,8 +19,6 @@ export default function ScoreCard({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">{summary}</p>
-
           <div>
             <h4 className="font-medium mb-2">Risks</h4>
             <ul className="space-y-2">

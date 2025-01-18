@@ -8,7 +8,7 @@ export type RepoFeedback = ChunkFeedback | UnifiedFeedback;
 
 export type FeedbackSuccess = {
   success: true;
-  data: UnifiedFeedback; 
+  data: UnifiedFeedback;
 };
 
 export type ActionState = {
@@ -27,14 +27,13 @@ export type FeedbackResult = FeedbackSuccess | FeedbackError;
 
 export type Action = (
   prevState: ActionState,
-  formData: FormData
+  formData: FormData,
 ) => Promise<ActionState>;
 
 export interface ScoreCardProps {
   title: string;
   score: number;
-  summary: string;
-  risks: string[]; 
-  actions: string[]; 
+  risks: string[];
+  actions: string[];
   children?: React.ReactNode;
 }
